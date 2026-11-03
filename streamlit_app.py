@@ -159,6 +159,9 @@ with tab_chart:
 # ── RISK & POSITION SIZE ─────────────────────────────────────────────────────
 with tab_risk:
     r = run(api.risk, symbol, atr_mult)
+    if r and (r.get("price") is None or r.get("suggested_stop_loss") is None):
+        st.warning("Price data for this symbol is incomplete right now. Try again later or try another symbol.")
+        r = None
     if r:
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Price", r["price"])

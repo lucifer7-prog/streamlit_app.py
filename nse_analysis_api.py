@@ -56,11 +56,12 @@ def cached(key, ttl, fn):
 
 def get_history(ticker, period="2y"):
     """Price history, cached for 15 minutes."""
-    return cached(
-        ("hist", ticker, period),
-        900,
-        lambda: yf.Ticker(ticker).history(period=period, auto_adjust=True),
-    )
+    def fetch():
+        h = yf.Ticker(ticker).history(period=period, auto_adjust=True)
+        # Yahoo sometimes returns a latest row with a missing Close; drop it
+        return h.dropna(subset=["Close"]) if not h.empty else h
+
+    return cached(("hist", ticker, period), 900, fetch)
 
 
 def to_ticker(symbol):
